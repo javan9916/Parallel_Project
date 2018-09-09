@@ -7,7 +7,9 @@ using System.Windows.Forms;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Office.Interop.Word;
+using Spire.Doc;
+using Spire.Doc.Documents;
+using System.Text;
 
 namespace ParallelProject
 {
@@ -90,16 +92,26 @@ namespace ParallelProject
                 this.Controls.OfType<System.Windows.Forms.CheckBox>().ToList().ForEach(apagar => apagar.Checked = false);
                 string extension = Path.GetExtension(openFileDialog1.FileName);
                 nombre = openFileDialog1.FileName;
+                lblArchivo.Text = nombre;
                 if (extension == ".docx" | extension == ".doc")
                 {
+                    Document document = new Document();
+                    document.LoadFromFile(@nombre);
 
-                }
-                else
-                {
-                    
-                }
+                    StringBuilder texto = new StringBuilder();
 
-                lblArchivo.Text = nombre;
+                    foreach (Section section in document.Sections)
+                    {
+
+                        foreach (Paragraph paragraph in section.Paragraphs)
+                        {
+                            texto.AppendLine(paragraph.Text);
+                        }
+                    }
+
+                    File.WriteAllText(@"C:\Users\Javier Araya Porras\new.txt", texto.ToString());
+                    nombre = @"C:\Users\Javier Araya Porras\new.txt";
+                }
 
                 Thread thread = new Thread(new ThreadStart(delegate ()
                 {
@@ -318,7 +330,7 @@ namespace ParallelProject
             ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
                        System.Text.Encoding.Default, false);
                 while (linea != null)
                 {

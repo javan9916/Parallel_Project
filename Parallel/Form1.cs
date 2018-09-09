@@ -102,7 +102,6 @@ namespace ParallelProject
 
                     foreach (Section section in document.Sections)
                     {
-
                         foreach (Paragraph paragraph in section.Paragraphs)
                         {
                             texto.AppendLine(paragraph.Text);
@@ -331,7 +330,7 @@ namespace ParallelProject
             if (nombre != "")
             {
                 System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
-                       System.Text.Encoding.Default, false);
+                       System.Text.UTF8Encoding.Default, false);
                 while (linea != null)
                 {
                     for (int i = 0; i < linea.Length; i++)

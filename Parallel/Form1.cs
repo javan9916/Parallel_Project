@@ -10,7 +10,6 @@ using System.IO;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using System.Text;
-
 namespace ParallelProject
 {
     public partial class Form1 : Form
@@ -23,6 +22,10 @@ namespace ParallelProject
         int totalCaracteres = 0;
         int suma = 0;
         bool iscontinue = true;
+        bool metodo;
+        bool cargado;
+        float ejecucion_archivosec;
+        float ejecucion_archivoparal;
 
         public Form1()
         {
@@ -78,6 +81,18 @@ namespace ParallelProject
             }
         }
 
+        //cambia el valor del metodo a true cuando secuencial es seleccionado
+        private void radioButton1_Click(object sender, EventArgs e)
+        {
+            metodo = true;
+        }
+
+        //cambia el valor del metodo a false cuando paralelo es seleccionado
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            metodo = false;
+        }
+
         //ejecuta las funciones del botón 1 para buscar, y leer el archivo
         private void button1_Click(object sender, EventArgs e)
         {
@@ -92,7 +107,7 @@ namespace ParallelProject
                 this.Controls.OfType<System.Windows.Forms.CheckBox>().ToList().ForEach(apagar => apagar.Checked = false);
                 string extension = Path.GetExtension(openFileDialog1.FileName);
                 nombre = openFileDialog1.FileName;
-                lblArchivo.Text = nombre;
+                
                 if (extension == ".docx" | extension == ".doc")
                 {
                     Document document = new Document();
@@ -107,16 +122,43 @@ namespace ParallelProject
                             texto.AppendLine(paragraph.Text);
                         }
                     }
-
-                    File.WriteAllText(@"C:\Users\Javier Araya Porras\new.txt", texto.ToString());
-                    nombre = @"C:\Users\Javier Araya Porras\new.txt";
+                    String archivo = Application.StartupPath + @"\carpeta";
+                    if (Directory.Exists(archivo))
+                    {
+                        String[] file = Directory.GetFiles(archivo);
+                        foreach (string i in file)
+                            File.Delete(i);
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(archivo);
+                    }
+                    using (System.IO.StreamWriter txt = new System.IO.StreamWriter(archivo + @"\nuevo.txt", false, Encoding.Default))
+                        txt.WriteLine(texto.ToString());
+                    nombre = archivo + @"\nuevo.txt";
                 }
 
                 Thread thread = new Thread(new ThreadStart(delegate ()
                 {
                     try
                     {
-                        archivo();
+                        if (radioButton1.Checked)
+                        {
+                            archivo_secuencial();
+                            lblArchivo.Text = nombre;
+                            metodo = true;
+                        }
+                        else if (radioButton2.Checked)
+                        {
+                            archivo_paral();
+                            lblArchivo.Text = nombre;
+                            metodo = false;
+
+                        } else
+                        {
+                            MessageBox.Show("Debe seleccionar un método", "Error");
+                        }
+                        
                     }
                     catch (Exception ex)
                     {
@@ -127,151 +169,158 @@ namespace ParallelProject
                 thread.Priority = ThreadPriority.Highest;
                 thread.IsBackground = true;
                 thread.Start();
-                
+
             }
         }
 
         //realiza las funciones del botón 2 que se encarga de inicializar todos los métodos y funciones
         private void button2_Click(object sender, EventArgs e)
         {
-            if (nombre == null)
+            if (metodo == cargado)
             {
-                this.Controls.OfType<TextBox>().ToList().ForEach(limpiar => limpiar.Text = "");
-                this.Controls.OfType<System.Windows.Forms.CheckBox>().ToList().ForEach(apagar => apagar.Checked = false);
-                MessageBox.Show("Debe seleccionar un archivo", "Error");
-            }
-            else
-            {
-                Thread thread = new Thread(new ThreadStart(delegate ()
+                if (nombre == null)
                 {
-                    try
+                    this.Controls.OfType<TextBox>().ToList().ForEach(limpiar => limpiar.Text = "");
+                    this.Controls.OfType<System.Windows.Forms.CheckBox>().ToList().ForEach(apagar => apagar.Checked = false);
+                    MessageBox.Show("Debe seleccionar un archivo", "Error");
+                }
+                else
+                {
+                    Thread thread = new Thread(new ThreadStart(delegate ()
                     {
-                        if (radioButton1.Checked == true)
+                        try
                         {
-                            Stopwatch secuencial = Stopwatch.StartNew();
-                            if (checkBox1.Checked == true)
+                            if (radioButton1.Checked == true)
                             {
-                                secuencial1();
+                                Stopwatch secuencial = Stopwatch.StartNew();
+                                if (checkBox1.Checked == true)
+                                {
+                                    secuencial1();
+                                }
+                                if (checkBox2.Checked == true)
+                                {
+                                    secuencial2();
+                                }
+                                if (checkBox3.Checked == true)
+                                {
+                                    secuencial3();
+                                }
+                                if (checkBox4.Checked == true)
+                                {
+                                    secuencial4();
+                                }
+                                if (checkBox5.Checked == true)
+                                {
+                                    secuencial5();
+                                }
+                                if (checkBox6.Checked == true)
+                                {
+                                    secuencial6();
+                                }
+                                if (checkBox7.Checked == true)
+                                {
+                                    secuencial7();
+                                }
+                                if (checkBox8.Checked == true)
+                                {
+                                    secuencial8();
+                                }
+                                if (checkBox9.Checked == true)
+                                {
+                                    sec_ranking();
+                                }
+                                float milisegundos = secuencial.ElapsedMilliseconds + ejecucion_archivosec;
+                                ejecucionSecuencial.Text = string.Format("{0:0 ms} ", milisegundos);
                             }
-                            if (checkBox2.Checked == true)
+                            else if (radioButton2.Checked == true)
                             {
-                                secuencial2();
-                            }
-                            if (checkBox3.Checked == true)
-                            {
-                                secuencial3();
-                            }
-                            if (checkBox4.Checked == true)
-                            {
-                                secuencial4();
-                            }
-                            if (checkBox5.Checked == true)
-                            {
-                                secuencial5();
-                            }
-                            if (checkBox6.Checked == true)
-                            {
-                                secuencial6();
-                            }
-                            if (checkBox7.Checked == true)
-                            {
-                                secuencial7();
-                            }
-                            if (checkBox8.Checked == true)
-                            {
-                                secuencial8();
-                            }
-                            if (checkBox9.Checked == true)
-                            {
-                                sec_ranking();
-                            }
-                            float milisegundos = secuencial.ElapsedMilliseconds;
-                            ejecucionSecuencial.Text = string.Format("{0:0 ms} ", milisegundos);
-                        }
-                        else if (radioButton2.Checked == true)
-                        {
-                            Stopwatch paralela = Stopwatch.StartNew();
-                            Parallel.Invoke(() =>
+                                Stopwatch paralela = Stopwatch.StartNew();
+                                Parallel.Invoke(() =>
                                 {
                                     if (checkBox1.Checked == true)
                                     {
                                         paralela1();
                                     }
                                 },
-                                () =>
-                                {
-                                    if (checkBox1.Checked == true)
+                                    () =>
                                     {
-                                        paralela2();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox3.Checked == true)
+                                        if (checkBox1.Checked == true)
+                                        {
+                                            paralela2();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela3();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox4.Checked == true)
+                                        if (checkBox3.Checked == true)
+                                        {
+                                            paralela3();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela4();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox5.Checked == true)
+                                        if (checkBox4.Checked == true)
+                                        {
+                                            paralela4();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela5();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox6.Checked == true)
+                                        if (checkBox5.Checked == true)
+                                        {
+                                            paralela5();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela6();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox7.Checked == true)
+                                        if (checkBox6.Checked == true)
+                                        {
+                                            paralela6();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela7();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox8.Checked == true)
+                                        if (checkBox7.Checked == true)
+                                        {
+                                            paralela7();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paralela8();
-                                    }
-                                },
-                                () =>
-                                {
-                                    if (checkBox9.Checked == true)
+                                        if (checkBox8.Checked == true)
+                                        {
+                                            paralela8();
+                                        }
+                                    },
+                                    () =>
                                     {
-                                        paral_ranking();
+                                        if (checkBox9.Checked == true)
+                                        {
+                                            paral_ranking();
+                                        }
                                     }
-                                }
-                            );
-                            float milisegundos = paralela.ElapsedMilliseconds;
-                            ejecucionParalela.Text = string.Format("{0:0 ms} ", milisegundos);
+                                );
+                                float milisegundos = paralela.ElapsedMilliseconds + ejecucion_archivoparal;
+                                ejecucionParalela.Text = string.Format("{0:0 ms} ", milisegundos);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Debe elegir de qué manera se realizarán las operaciones", "Error");
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            MessageBox.Show("Debe elegir de qué manera se realizarán las operaciones", "Error");
+                            Console.WriteLine(ex.Message);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }));
+                    }));
 
-                thread.Priority = ThreadPriority.Highest;
-                thread.IsBackground = true;
-                thread.Start();
+                    thread.Priority = ThreadPriority.Highest;
+                    thread.IsBackground = true;
+                    thread.Start();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Debe cargar el archivo de nuevo si desea cambiar de metodo de ejecucion", "Error");
             }
 
         }
@@ -317,10 +366,11 @@ namespace ParallelProject
             listView2.Columns.Add(header3);
         }
 
-        //se ejecuta al cargar el archivo y llena las listas listaCantidad, listaDiferentes y listaPalabras
-        public void archivo()
+        //se ejecuta al cargar el archivo y llena las listas listaCantidad, listaDiferentes y listaPalabras secuencialmente
+        public void archivo_secuencial()
         {
             label8.Text = "Cargando...";
+            cargado = true;
             Stopwatch temporizador = Stopwatch.StartNew();
             String palabra = "";
             String linea = "";
@@ -329,8 +379,8 @@ namespace ParallelProject
             ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
-                       System.Text.UTF8Encoding.Default, false);
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre, System.Text.Encoding.Default, false);
+
                 while (linea != null)
                 {
                     for (int i = 0; i < linea.Length; i++)
@@ -379,15 +429,51 @@ namespace ParallelProject
                             }
                         }
                     }
+                    if (palabra != "")
+                    {
+                        palabra = palabra.ToLower();
+                        if (listaDiferentes == null)
+                        {
+                            listaDiferentes.Add(palabra.ToLower());
+                        }
+                        else
+                        {
+                            if (listaDiferentes.Contains(palabra))
+                            {
+                                if (listaPalabras == null)
+                                {
+                                    listaPalabras.Add(contador1);
+                                    suma += contador1;
+                                }
+                                else
+                                {
+                                    int posicion = listaDiferentes.IndexOf(palabra);
+                                    int numero = listaPalabras[posicion];
+                                    numero += 1;
+                                    listaPalabras[posicion] = numero;
+                                }
+                            }
+                            else
+                            {
+                                listaCantidad.Add(contador);
+                                listaDiferentes.Add(palabra.ToLower());
+                                listaPalabras.Add(contador1);
+                                suma += contador1;
+                            }
+                        }
+                        palabra = "";
+                        contador = 0;
+                    }
                     tex.Add(linea);
                     linea = archivo.ReadLine();
                 }
+
                 Console.WriteLine(listaPalabras.Count);
                 Console.WriteLine(listaDiferentes.Count);
                 archivo.Close();
             }
-            float milisegundos = temporizador.ElapsedMilliseconds;
-            ejecucion0.Text = string.Format("{0:0 ms} ", milisegundos);
+            float ejecucion_archivosec = temporizador.ElapsedMilliseconds;
+            ejecucion0.Text = string.Format("{0:0 ms} ", ejecucion_archivosec);
             label8.Text = "Archivo listo";
         }
 
@@ -411,7 +497,7 @@ namespace ParallelProject
                 }
             }
             textBox1.AppendText(palabra);
-        
+
             float milisegundos = temporizador.ElapsedMilliseconds;
             ejecucion1.Text = string.Format("{0:0 ms} ", milisegundos);
         }
@@ -452,7 +538,7 @@ namespace ParallelProject
             ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
                        System.Text.Encoding.Default, false);
                 while (linea != null)
                 {
@@ -479,7 +565,7 @@ namespace ParallelProject
             ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
                        System.Text.Encoding.Default, false);
                 while (linea != null)
                 {
@@ -512,7 +598,7 @@ namespace ParallelProject
             ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
                        System.Text.Encoding.Default, false);
                 while (linea != null)
                 {
@@ -553,7 +639,7 @@ namespace ParallelProject
                 ArrayList tex = new ArrayList();
                 if (nombre != "")
                 {
-                    System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
+                    System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
                        System.Text.Encoding.Default, false);
                     while (linea != null)
                     {
@@ -698,6 +784,224 @@ namespace ParallelProject
             }
         }
 
+        //se ejecuta al cargar el archivo y llena las listas listaCantidad, listaDiferentes y listaPalabras paralelamente
+        public void archivo_paral()
+        {
+            label8.Text = "Cargando...";
+            Stopwatch temporizador = Stopwatch.StartNew();
+            cargado = false;
+
+            if (nombre != "")
+            {
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre, System.Text.Encoding.Default, false);
+                FileStream archivo1 = File.OpenRead(nombre);
+                int length = (int)archivo1.Length;
+                Parallel.Invoke(() => {
+                    for (int a = 0; a < length / 2; a++)
+                    {
+                        String palabra = "";
+                        String linea = "";
+                        int contador = 0;
+                        int contador1 = 1;
+                        ArrayList tex = new ArrayList();
+
+                        while (linea != null)
+                        {
+                            for (int i = 0; i < linea.Length; i++)
+                            {
+                                if (char.IsLetter(linea[i]))
+                                {
+                                    palabra += linea[i];
+                                    contador += 1;
+                                }
+                                else
+                                {
+                                    if (palabra != "")
+                                    {
+                                        palabra = palabra.ToLower();
+                                        if (listaDiferentes == null)
+                                        {
+                                            listaDiferentes.Add(palabra.ToLower());
+                                        }
+                                        else
+                                        {
+                                            if (listaDiferentes.Contains(palabra))
+                                            {
+                                                if (listaPalabras == null)
+                                                {
+                                                    listaPalabras.Add(contador1);
+                                                    suma += contador1;
+                                                }
+                                                else
+                                                {
+                                                    int posicion = listaDiferentes.IndexOf(palabra);
+                                                    int numero = listaPalabras[posicion];
+                                                    numero += 1;
+                                                    listaPalabras[posicion] = numero;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                listaCantidad.Add(contador);
+                                                listaDiferentes.Add(palabra.ToLower());
+                                                listaPalabras.Add(contador1);
+                                                suma += contador1;
+                                            }
+                                        }
+                                        palabra = "";
+                                        contador = 0;
+                                    }
+                                }
+                            }
+                            if (palabra != "")
+                            {
+                                palabra = palabra.ToLower();
+                                if (listaDiferentes == null)
+                                {
+                                    listaDiferentes.Add(palabra.ToLower());
+                                }
+                                else
+                                {
+                                    if (listaDiferentes.Contains(palabra))
+                                    {
+                                        if (listaPalabras == null)
+                                        {
+                                            listaPalabras.Add(contador1);
+                                            suma += contador1;
+                                        }
+                                        else
+                                        {
+                                            int posicion = listaDiferentes.IndexOf(palabra);
+                                            int numero = listaPalabras[posicion];
+                                            numero += 1;
+                                            listaPalabras[posicion] = numero;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        listaCantidad.Add(contador);
+                                        listaDiferentes.Add(palabra.ToLower());
+                                        listaPalabras.Add(contador1);
+                                        suma += contador1;
+                                    }
+                                }
+                                palabra = "";
+                                contador = 0;
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                },
+                () =>
+                {
+                    for (int b = length; b > length / 2 + 1; b--)
+                    {
+
+                        String palabra = "";
+                        String linea = "";
+                        int contador = 0;
+                        int contador1 = 1;
+                        ArrayList tex = new ArrayList();
+
+                        while (linea != null)
+                        {
+                            for (int i = 0; i < linea.Length; i++)
+                            {
+                                if (char.IsLetter(linea[i]))
+                                {
+                                    palabra += linea[i];
+                                    contador += 1;
+                                }
+                                else
+                                {
+                                    if (palabra != "")
+                                    {
+                                        palabra = palabra.ToLower();
+                                        if (listaDiferentes == null)
+                                        {
+                                            listaDiferentes.Add(palabra.ToLower());
+                                        }
+                                        else
+                                        {
+                                            if (listaDiferentes.Contains(palabra))
+                                            {
+                                                if (listaPalabras == null)
+                                                {
+                                                    listaPalabras.Add(contador1);
+                                                    suma += contador1;
+                                                }
+                                                else
+                                                {
+                                                    int posicion = listaDiferentes.IndexOf(palabra);
+                                                    int numero = listaPalabras[posicion];
+                                                    numero += 1;
+                                                    listaPalabras[posicion] = numero;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                listaCantidad.Add(contador);
+                                                listaDiferentes.Add(palabra.ToLower());
+                                                listaPalabras.Add(contador1);
+                                                suma += contador1;
+                                            }
+                                        }
+                                        palabra = "";
+                                        contador = 0;
+                                    }
+                                }
+                            }
+                            if (palabra != "")
+                            {
+                                palabra = palabra.ToLower();
+                                if (listaDiferentes == null)
+                                {
+                                    listaDiferentes.Add(palabra.ToLower());
+                                }
+                                else
+                                {
+                                    if (listaDiferentes.Contains(palabra))
+                                    {
+                                        if (listaPalabras == null)
+                                        {
+                                            listaPalabras.Add(contador1);
+                                            suma += contador1;
+                                        }
+                                        else
+                                        {
+                                            int posicion = listaDiferentes.IndexOf(palabra);
+                                            int numero = listaPalabras[posicion];
+                                            numero += 1;
+                                            listaPalabras[posicion] = numero;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        listaCantidad.Add(contador);
+                                        listaDiferentes.Add(palabra.ToLower());
+                                        listaPalabras.Add(contador1);
+                                        suma += contador1;
+                                    }
+                                }
+                                palabra = "";
+                                contador = 0;
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                });
+
+                Console.WriteLine(listaPalabras.Count);
+                Console.WriteLine(listaDiferentes.Count);
+                archivo.Close();
+            }
+            float ejecucion_archivoparal = temporizador.ElapsedMilliseconds;
+            ejecucion0.Text = string.Format("{0:0 ms} ", ejecucion_archivoparal);
+            label8.Text = "Archivo listo";
+        }
+
         //realiza la función de encontrar la palabra más larga del texto de manera paralela
         public void paralela1()
         {
@@ -721,7 +1025,7 @@ namespace ParallelProject
                         }
                     }
                 }
-            }, 
+            },
             () =>
             {
                 for (int a = listaDiferentes.Count; a < listaDiferentes.Count / 2 + 1; a--)
@@ -769,7 +1073,7 @@ namespace ParallelProject
                 }
             }, () =>
             {
-                for (int a = listaPalabras.Count ; a < listaPalabras.Count / 2 + 1; a++)
+                for (int a = listaPalabras.Count; a < listaPalabras.Count / 2 + 1; a++)
                 {
                     suma2 += listaPalabras[a];
                 }
@@ -805,19 +1109,44 @@ namespace ParallelProject
         public void paralela4()
         {
             Stopwatch temporizador = Stopwatch.StartNew();
-            String linea = "";
-            int contador = 0;
-            ArrayList tex = new ArrayList();
+            int contador = 0;     
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
-                       System.Text.Encoding.Default, false);
-                while (linea != null)
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
+                System.Text.Encoding.Default, false);
+                FileStream archivo1 = File.OpenRead(nombre);
+                int length = (int)archivo1.Length;
+
+                Parallel.Invoke(() =>
                 {
-                    tex.Add(linea);
-                    contador += linea.Length;
-                    linea = archivo.ReadLine();
-                }
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+
+                    for (int a = 0; a < length / 2; a++)
+                    {
+                        while (linea != null)
+                        {
+                            tex.Add(linea);
+                            contador += linea.Length;
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                }, () =>
+                {
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+
+                    for (int b = length; b > length / 2 + 1; b--)
+                    {
+                        while (linea != null)
+                        {
+                            tex.Add(linea);
+                            contador += linea.Length;
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                });
+
                 textBox4.AppendText(Convert.ToString(contador));
                 totalCaracteres = contador;
                 archivo.Close();
@@ -830,29 +1159,63 @@ namespace ParallelProject
         public void paralela5()
         {
             Stopwatch temporizador = Stopwatch.StartNew();
-            String linea = "";
             int contador = 0;
             int espacios = 0;
-            char letras;
-            ArrayList tex = new ArrayList();
+            
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
-                       System.Text.Encoding.Default, false);
-                while (linea != null)
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
+                System.Text.Encoding.Default, false);
+                FileStream archivo1 = File.OpenRead(nombre);
+                int length = (int)archivo1.Length;
+
+                Parallel.Invoke(() =>
                 {
-                    contador += linea.Length;
-                    for (int a = 0; a < linea.Length; a++)
+                    char letras;
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+                    for (int a = 0; a < length / 2; a++)
                     {
-                        letras = linea[a];
-                        if (letras.Equals(' '))
+                        while (linea != null)
                         {
-                            espacios += 1;
+                            contador += linea.Length;
+                            for (int x = 0; x < linea.Length; x++)
+                            {
+                                letras = linea[x];
+                                if (letras.Equals(' '))
+                                {
+                                    espacios += 1;
+                                }
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
                         }
                     }
-                    tex.Add(linea);
-                    linea = archivo.ReadLine();
-                }
+                }, () =>
+                {
+                    char letras;
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+                    for (int b = length; b > length / 2 + 1; b--)
+                    {
+                        while (linea != null)
+                        {
+                            contador += linea.Length;
+                            for (int a = 0; a < linea.Length; a++)
+                            {
+                                letras = linea[a];
+                                if (letras.Equals(' '))
+                                {
+                                    espacios += 1;
+                                }
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                });
+
+                
                 contador = contador - espacios;
                 textBox5.AppendText(Convert.ToString(contador));
                 archivo.Close();
@@ -865,25 +1228,55 @@ namespace ParallelProject
         public void paralela6()
         {
             Stopwatch temporizador = Stopwatch.StartNew();
-            String linea = "";
             int contador = 0;
-            ArrayList tex = new ArrayList();
             if (nombre != "")
             {
-                System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
-                       System.Text.Encoding.Default, false);
-                while (linea != null)
+                System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
+                System.Text.Encoding.Default, false);
+                FileStream archivo1 = File.OpenRead(nombre);
+                int length = (int)archivo1.Length;
+
+                Parallel.Invoke(() =>
                 {
-                    for (int i = 0; i < linea.Length; i++)
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+
+                    for (int a = 0; a < length / 2; a++)
                     {
-                        if (linea[i] == '.')
+                        while (linea != null)
                         {
-                            contador += 1;
+                            for (int i = 0; i < linea.Length; i++)
+                            {
+                                if (linea[i] == '.')
+                                {
+                                    contador += 1;
+                                }
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
                         }
                     }
-                    tex.Add(linea);
-                    linea = archivo.ReadLine();
-                }
+                }, () =>
+                {
+                    String linea = "";
+                    ArrayList tex = new ArrayList();
+
+                    for (int b = length; b > length / 2 + 1; b--)
+                    {
+                        while (linea != null)
+                        {
+                            for (int i = 0; i < linea.Length; i++)
+                            {
+                                if (linea[i] == '.')
+                                {
+                                    contador += 1;
+                                }
+                            }
+                            tex.Add(linea);
+                            linea = archivo.ReadLine();
+                        }
+                    }
+                });
                 textBox6.AppendText(Convert.ToString(contador));
                 archivo.Close();
             }
@@ -905,37 +1298,79 @@ namespace ParallelProject
             }
             else
             {
-                String palabra = "";
-                String linea = "";
                 int contador = 0;
-                ArrayList tex = new ArrayList();
                 if (nombre != "")
                 {
-                    System.IO.StreamReader archivo = new System.IO.StreamReader(openFileDialog1.FileName,
-                       System.Text.Encoding.Default, false);
-                    while (linea != null)
+                    System.IO.StreamReader archivo = new System.IO.StreamReader(nombre,
+                    System.Text.Encoding.Default, false);
+                    FileStream archivo1 = File.OpenRead(nombre);
+                    int length = (int)archivo1.Length;
+
+                    Parallel.Invoke(() =>
                     {
-                        for (int i = 0; i < linea.Length; i++)
+                        String palabra = "";
+                        String linea = "";
+                        ArrayList tex = new ArrayList();
+
+                        for (int a = 0; a < length / 2; a++)
                         {
-                            if (char.IsLetter(linea[i]))
+                            while (linea != null)
                             {
-                                palabra += linea[i];
-                            }
-                            else
-                            {
-                                if (palabra != "")
+                                for (int i = 0; i < linea.Length; i++)
                                 {
-                                    if (palabra.ToLower() == N_palabra.ToLower())
+                                    if (char.IsLetter(linea[i]))
                                     {
-                                        contador += 1;
+                                        palabra += linea[i];
                                     }
-                                    palabra = "";
+                                    else
+                                    {
+                                        if (palabra != "")
+                                        {
+                                            if (palabra.ToLower() == N_palabra.ToLower())
+                                            {
+                                                contador += 1;
+                                            }
+                                            palabra = "";
+                                        }
+                                    }
                                 }
+                                tex.Add(linea);
+                                linea = archivo.ReadLine();
                             }
                         }
-                        tex.Add(linea);
-                        linea = archivo.ReadLine();
-                    }
+                    }, () =>
+                    {
+                        String palabra = "";
+                        String linea = "";
+                        ArrayList tex = new ArrayList();
+
+                        for (int b = length; b > length / 2 + 1; b--)
+                        {
+                            while (linea != null)
+                            {
+                                for (int i = 0; i < linea.Length; i++)
+                                {
+                                    if (char.IsLetter(linea[i]))
+                                    {
+                                        palabra += linea[i];
+                                    }
+                                    else
+                                    {
+                                        if (palabra != "")
+                                        {
+                                            if (palabra.ToLower() == N_palabra.ToLower())
+                                            {
+                                                contador += 1;
+                                            }
+                                            palabra = "";
+                                        }
+                                    }
+                                }
+                                tex.Add(linea);
+                                linea = archivo.ReadLine();
+                            }
+                        }
+                    });
                     lblRepeats.Text = Convert.ToString(contador);
                     archivo.Close();
                 }
@@ -944,7 +1379,7 @@ namespace ParallelProject
             ejecucion7.Text = string.Format("{0:0 ms}", milisegundos);
         }
 
-        //realiza la función de contar las N palabras más comunes del texto y acomodarlas en una lista de manera paralela
+        //realiza la función de contar las N palabras más comunes del texto
         public void paralela8()
         {
             Stopwatch temporizador = Stopwatch.StartNew();
@@ -1004,7 +1439,7 @@ namespace ParallelProject
             ejecucion8.Text = string.Format("{0:0} ms", milisegundos);
         }
 
-        //realiza la función de hacer el ranking de palabras y acomodarlas en una lista de manera paralela
+        //realiza la función de hacer el ranking de palabras y acomodarlas en una lista
         public void paral_ranking()
         {
             Stopwatch temporizador = Stopwatch.StartNew();
@@ -1055,5 +1490,7 @@ namespace ParallelProject
                 ejecucion9.Text = string.Format("{0:0 ms}", milisegundos);
             }
         }
+
+
     }
 }
